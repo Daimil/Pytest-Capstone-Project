@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Pytest Capstone UI</title>
+  <style>
+    body{font-family:system-ui,Segoe UI,Arial;margin:2rem;max-width:900px}
+    .card{border:1px solid #e5e7eb;border-radius:14px;padding:1rem 1.25rem}
+    .row{display:flex;gap:1rem;flex-wrap:wrap}
+    label{display:block;font-size:.9rem;margin:.5rem 0 .25rem}
+    input,select{padding:.6rem .7rem;border:1px solid #e5e7eb;border-radius:10px;min-width:200px}
+    button{padding:.7rem 1rem;border:0;border-radius:12px;background:#111827;color:#fff;cursor:pointer}
+    pre{background:#0b1020;color:#e5e7eb;padding:1rem;border-radius:12px;overflow:auto}
+  </style>
+</head>
+<body>
+  <h1>Capstone Checkout (UI)</h1>
+  <p>This page calls the FastAPI <code>/checkout</code> endpoint. It’s intentionally small but realistic for UI automation.</p>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label for="coupon">Coupon</label>
+        <select id="coupon" data-testid="coupon">
+          <option value="">(none)</option>
+          <option value="SAVE10">SAVE10</option>
+          <option value="SAVE20">SAVE20</option>
+        </select>
+      </div>
+      <div>
+        <label for="state">State</label>
+        <select id="state" data-testid="state">
+          <option value="NY">NY</option>
+          <option value="CA">CA</option>
+          <option value="TX">TX</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label for="qty">Qty</label>
+        <input id="qty" data-testid="qty" type="number" value="2" min="1"/>
+      </div>
+      <div>
+        <label for="price">Price</label>
+        <input id="price" data-testid="price" type="number" value="60" min="0" step="0.01"/>
+      </div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <button id="run" data-testid="run">Run checkout</button>
+    </div>
+
+    <h3>Result</h3>
+    <pre id="out" data-testid="out">{}</pre>
+  </div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+$("run").addEventListener("click", async () => {
+  const body = {
+    coupon: $("coupon").value || null,
+    state: $("state").value,
+    items: [{ sku: "SKU-1", qty: Number($("qty").value), price: Number($("price").value) }]
+  };
+  $("out").textContent = "Loading...";
+  const resp = await fetch("/checkout", { method:"POST", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(body) });
+  const data = await resp.json();
+  $("out").textContent = JSON.stringify({ status: resp.status, data }, null, 2);
+});
+</script>
+</body>
+</html>
